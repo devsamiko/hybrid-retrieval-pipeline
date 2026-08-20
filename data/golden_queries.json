@@ -1,0 +1,18 @@
+[
+  {"query": "how does reciprocal rank fusion combine two ranked lists", "expected_doc": "doc_01_rrf.md"},
+  {"query": "why use rank instead of raw scores when merging search results", "expected_doc": "doc_01_rrf.md"},
+  {"query": "difference between bi-encoder and cross-encoder for search", "expected_doc": "doc_02_cross_encoder.md"},
+  {"query": "why is reranking slower than the initial retrieval step", "expected_doc": "doc_02_cross_encoder.md"},
+  {"query": "how to mine hard negatives for training a reranker", "expected_doc": "doc_03_finetuning.md"},
+  {"query": "what metric should I use to evaluate a fine-tuned reranker", "expected_doc": "doc_03_finetuning.md"},
+  {"query": "how should long documents be split before embedding", "expected_doc": "doc_04_chunking.md"},
+  {"query": "why does chunk overlap matter for retrieval", "expected_doc": "doc_04_chunking.md"},
+  {"query": "does compressing text with an LLM before embedding improve search", "expected_doc": "doc_05_llm_compression.md"},
+  {"query": "difference between a generic summary and a retrieval-oriented compression prompt", "expected_doc": "doc_05_llm_compression.md"},
+  {"query": "what is approximate nearest neighbor search", "expected_doc": "doc_06_vector_db.md"},
+  {"query": "why keep a flat fallback index alongside HNSW", "expected_doc": "doc_06_vector_db.md"},
+  {"query": "how does BM25 rank documents for a keyword query", "expected_doc": "doc_07_keyword_search.md"},
+  {"query": "when does keyword search outperform semantic vector search", "expected_doc": "doc_07_keyword_search.md"},
+  {"query": "what is Recall at 1 in retrieval evaluation", "expected_doc": "doc_08_evaluation.md"},
+  {"query": "why report a confidence interval on a small evaluation set", "expected_doc": "doc_08_evaluation.md"}
+]
