@@ -76,46 +76,32 @@ Raw chunk                    LLM compression       (src/llm_compression.py, opti
 
 ## Results
 
-Two separate, clearly-labeled results — full detail and honest caveats in
-[`evaluation/results.md`](evaluation/results.md).
+Full numbers, methodology, and caveats in
+[`evaluation/results.md`](evaluation/results.md). Short version:
 
-**Key finding:** LLM-based retrieval compression appears to be
-corpus-dependent — it can hurt retrieval on short, clean, information-dense
-documents, while substantially improving retrieval on a large, noisy,
-redundant knowledge corpus. The interesting result isn't just that
-compression improved Recall@1 in production — it's that the same technique
-produced a negative result on clean data and a large positive result on a
-realistic corpus, which is what's actually worth investigating.
+1. **Reranker fine-tuning**: +9.3 points Recall@1 (58.5% → 67.8%), measured
+   on the original 118-query production evaluation set. Verified against
+   the original system's saved eval data.
 
-1. **Reranker fine-tuning**: +9.3 percentage points Recall@1 (58.5% →
-   67.8%), measured on the original 118-query production evaluation set.
-   Verified against the original system's saved eval artifact.
+2. **LLM compression before embedding, tested at two scales.** On the
+   bundled 8-document demo, it hurt — both a plain summary and a
+   retrieval-oriented compressed representation scored *below* raw-chunk
+   embedding (−6.2 and −12.5 points Recall@1). On the source system's real
+   402K-vector corpus (47 held-out queries, live retrieval, read-only), it
+   helped a lot: +14.9 points Recall@1 (61.7% → 76.6%). That's close to a
+   historical "+13%" claim from the source system's docs, but this time
+   there's an actual query set and evaluation behind it.
 
-2. **LLM compression ablation, two scales:**
-   - On the bundled **8-document demo set** (run fresh, in this repo):
-     compression **did not help** — both a generic LLM summary and a
-     retrieval-oriented compressed representation scored *below* the
-     raw-chunk baseline (−6.2 and −12.5 percentage points Recall@1).
-   - On the source system's **real 402K-vector production corpus** (47
-     held-out book/reference queries, live hybrid retrieval, read-only):
-     compression **helped substantially** — +14.9 percentage points
-     Recall@1 (61.7% → 76.6%), which confirms and slightly exceeds a
-     historical, previously-unverified "+13%" claim from the source
-     system's architecture doc.
+   Small clean corpus: compression hurts. Large redundant corpus:
+   compression helps. My current explanation is that compression only pays
+   off once there's real noise in the source text to strip out — a small,
+   dense demo corpus doesn't have any, so compression just throws away
+   signal. That's a hypothesis backed by two data points, not something
+   I've proven with a proper sweep across corpus sizes.
 
-   Read together, these two runs support a corpus-dependent hypothesis:
-   compression only helps once the source corpus has enough redundancy and
-   noise for compression to actually strip out. A small, clean,
-   low-redundancy demo corpus doesn't have that noise, so compression just
-   discards useful signal there; a large, heterogeneous real corpus does,
-   so compression helps. Full numbers, methodology, and caveats for both
-   runs are in `evaluation/results.md`.
-
-Both results are presented deliberately, not just the flattering one — an
-ablation that shows a plausible technique failing at small scale, and then
-confirms it at the scale it was actually designed for, with a stated and
-tested hypothesis explaining the difference, is a more useful engineering
-artifact than a single success number with no caveats.
+Both results are in here on purpose, not just the flattering one. A
+technique that fails small and works big, with a stated reason why, tells
+you more than a single clean success number would.
 
 ## Running it
 
