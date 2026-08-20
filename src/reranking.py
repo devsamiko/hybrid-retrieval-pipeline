@@ -40,6 +40,14 @@ def rerank(query: str, candidates: list[dict], model_name: str = DEFAULT_RERANKE
     pairs = [(query, c["text"]) for c in pool]
     raw_scores = reranker.predict(pairs)
 
+    # Min-max normalization here is relative to THIS query's candidate pool,
+    # not a fixed scale — the worst candidate in any pool always maps to 0
+    # and the best to 1, regardless of whether any candidate is actually a
+    # good match. That's a real limitation: it discards the reranker's
+    # absolute-confidence signal and keeps only relative order within an
+    # already-filtered pool. Acceptable for reranking a pre-filtered top-N
+    # (the ordering is what matters here), but don't reuse this pattern
+    # anywhere an absolute confidence threshold is needed.
     s_min, s_max = min(raw_scores), max(raw_scores)
     s_range = (s_max - s_min) or 1.0
     rrf_max = max(c.get("rrf_score", 0.0) for c in pool) or 1.0

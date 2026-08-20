@@ -3,8 +3,9 @@
 evaluate_recall.py — Retrieval evaluation, including a 3-way compression ablation
 ====================================================================================
 Measures Recall@1 (was the correct document ranked first?) on the golden
-query set in data/golden_queries.json, across three embedding strategies for
-the SAME documents and SAME retrieval code path:
+query set in data/golden_queries.json, across three embedding strategies,
+through the SAME full pipeline (hybrid vector+keyword+RRF search, then
+cross-encoder reranking — src/retrieval.py + src/reranking.py) for all three:
 
     1. raw       — embed the chunk's raw text directly (baseline)
     2. summary   — embed a generic LLM-generated summary of the chunk
@@ -34,11 +35,13 @@ import faiss                                 # noqa: E402,F401 — see retrieval
                                               # import before torch to avoid a macOS segfault
 from src.chunking import semantic_chunk      # noqa: E402
 from src.embeddings import embed_texts       # noqa: E402
-from src.retrieval import Index              # noqa: E402
+from src.retrieval import Index, hybrid_search  # noqa: E402
+from src.reranking import rerank             # noqa: E402
 
 DOCS_DIR = ROOT / "data" / "example_documents"
 GOLDEN_FILE = ROOT / "data" / "golden_queries.json"
 RESULTS_FILE = Path(__file__).parent / "results.json"
+RERANK_POOL = 10  # candidates pulled from hybrid search before reranking
 
 
 def load_documents() -> dict[str, str]:
@@ -69,10 +72,15 @@ def build_index(chunks_by_doc: dict[str, list[str]]) -> Index:
 
 
 def evaluate_variant(index: Index, golden: list[dict]) -> dict:
+    """Recall@1 through the FULL pipeline: hybrid (vector+keyword+RRF) search,
+    then cross-encoder reranking — the same path examples/basic_pipeline.py
+    uses, not vector search alone. A vector-only eval would measure a
+    different, easier system than the one this repo actually presents."""
     hits_at_1 = 0
     total = 0
     for gq in golden:
-        results = index.vector_search(gq["query"], top_k=5)
+        candidates = hybrid_search(index, gq["query"], top_k=RERANK_POOL)
+        results = rerank(gq["query"], candidates, top_k=5)
         total += 1
         if results and results[0]["doc_id"] == gq["expected_doc"]:
             hits_at_1 += 1
@@ -99,7 +107,7 @@ def run_compressed_variant(docs: dict[str, str], golden: list[dict], mode: str) 
         print("  [skip] local LLM not available (server not running)")
         return None
 
-    from llm_compression import compress_for_retrieval, summarize_plain
+    from src.llm_compression import compress_for_retrieval, summarize_plain
 
     def generate_fn(prompt: str) -> str:
         return llm_generate(prompt, max_tokens=100)

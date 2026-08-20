@@ -15,8 +15,9 @@ Adapted from a production fine-tuning pipeline. The algorithm is unchanged:
 NOTE on the example dataset: this repo's data/golden_queries.json has 16
 queries over 8 documents — enough to demonstrate the pipeline runs
 end-to-end, but far too small to produce a meaningful fine-tuning result
-(the general guidance is a minimum of ~100 golden examples to detect a 10%
-difference reliably — see Huyen, AI Engineering, Table 4-7). Running this on
+(a rough rule of thumb in practice is a minimum of ~100 golden examples to
+detect a 10% difference reliably — this is general evaluation-sizing
+guidance, not a specific cited source). Running this on
 the bundled example data will complete without error but the resulting
 delta is not a claim worth reporting. The real measured result this
 technique produced (+9.3 percentage points Recall@1, base 58.5% -> tuned
@@ -25,9 +26,8 @@ its original source data, not re-claimed here from a toy run.
 
 Usage:
     python train_reranker.py --generate      # build training pairs
-    python train_reranker.py --train         # fine-tune
-    python train_reranker.py --eval          # compare base vs fine-tuned
-    python train_reranker.py --all           # all steps in sequence
+    python train_reranker.py --train         # fine-tune (also runs before/after eval)
+    python train_reranker.py --all           # both steps in sequence
 """
 
 import argparse
@@ -80,7 +80,7 @@ def _build_search_index():
 
 def generate_training_data():
     """Mine positive/hard-negative pairs from golden queries via hybrid search."""
-    from retrieval import hybrid_search
+    from src.retrieval import hybrid_search
 
     index = _build_search_index()
     golden = _load_golden()

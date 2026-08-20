@@ -64,7 +64,14 @@ def compress_for_retrieval(text: str, generate: GenerateFn, max_chars: int = 400
 
 
 def summarize_plain(text: str, generate: GenerateFn, max_chars: int = 4000) -> str:
-    """Conventional summary — ablation control, isolates length from technique."""
+    """Conventional summary — ablation control, isolates length from technique.
+
+    Unlike compress_for_retrieval() (which explicitly asks for one line),
+    the summary prompt asks for "one or two plain sentences" with no
+    single-line constraint, so a second sentence may land on its own line.
+    Join all lines rather than truncating to the first, or a two-sentence
+    summary silently loses its second sentence."""
     text = text[:max_chars]
     response = generate(_summary_prompt(text))
-    return response.strip().split("\n")[0].strip().strip('"').strip("'")
+    joined = " ".join(line.strip() for line in response.strip().splitlines() if line.strip())
+    return joined.strip().strip('"').strip("'")

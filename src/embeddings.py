@@ -9,6 +9,11 @@ the retrieval algorithm, so this standalone version calls the model directly.
 
 from functools import lru_cache
 
+# The source system runs bge-large-en-v1.5. This repo defaults to bge-small
+# instead — smaller download, faster to run for anyone cloning this to try
+# it out, and the demo corpus is tiny enough that model capacity isn't the
+# bottleneck. Swap DEFAULT_MODEL to bge-large for closer parity with the
+# source system's numbers.
 DEFAULT_MODEL = "BAAI/bge-small-en-v1.5"
 
 

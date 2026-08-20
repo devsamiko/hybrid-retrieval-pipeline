@@ -11,3 +11,4 @@ training/reranker-finetuned/
 training/training_data.json
 training/training_eval.json
 evaluation/results.json
+.DS_Store

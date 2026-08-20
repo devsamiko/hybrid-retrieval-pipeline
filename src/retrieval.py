@@ -110,6 +110,12 @@ def reciprocal_rank_fusion(
 ) -> list[dict]:
     """Combine multiple ranked result lists into one, by Reciprocal Rank Fusion.
 
+    rrf_k=60 is the standard literature default (Cormack et al., 2009). The
+    source system this pipeline was extracted from tunes it lower (RRF_K=10)
+    for its specific corpus — that's a deliberate choice for that system, not
+    reproduced here; 60 is the right value to start from on an unfamiliar
+    corpus.
+
     RRF score for a document = sum over lists of 1 / (rrf_k + rank), where rank
     is that document's 0-based position in each list it appears in. Documents
     absent from a list contribute nothing from it. This is rank-based (not

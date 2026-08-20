@@ -84,9 +84,10 @@ Full numbers, methodology, and caveats in
    the original system's saved eval data.
 
 2. **LLM compression before embedding, tested at two scales.** On the
-   bundled 8-document demo, it hurt — both a plain summary and a
+   bundled 8-document demo (full hybrid search + reranking pipeline, not
+   vector search alone), it hurt — both a plain summary and a
    retrieval-oriented compressed representation scored *below* raw-chunk
-   embedding (−6.2 and −12.5 points Recall@1). On the source system's real
+   embedding (−6.2 and −31.2 points Recall@1). On the source system's real
    402K-vector corpus (47 held-out queries, live retrieval, read-only), it
    helped a lot: +14.9 points Recall@1 (61.7% → 76.6%). That's close to a
    historical "+13%" claim from the source system's docs, but this time

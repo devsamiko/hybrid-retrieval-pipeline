@@ -30,7 +30,8 @@ documents the base model missed entirely.
 I re-ran the training pipeline on this repo's 16-query demo set as a smoke
 test. It completes without error but the number means nothing — 16 queries
 is well below the ~100 generally needed to detect a 10% difference
-reliably (Huyen, *AI Engineering*, Table 4-7).
+reliably — that's a rough practitioner rule of thumb, not a specific
+cited source.
 
 ## 2. LLM compression: small demo corpus
 
@@ -39,17 +40,23 @@ a 2026-05-03 A/B test. There's no saved query set or per-query data behind
 that number — just the prose claim. So I ran my own 3-way ablation instead
 of repeating it: raw chunk vs. a generic LLM summary vs. a
 retrieval-oriented compressed representation ("AKA"), same 8 documents, 16
-golden queries, same retrieval code for all three.
+golden queries, same full pipeline for all three — hybrid (vector +
+keyword + RRF) search, then cross-encoder reranking, not vector search
+alone.
 
 | Variant | Recall@1 | vs. raw |
 |---|---|---|
-| Raw chunk embedding | 87.5% (14/16) | — |
-| Generic LLM summary | 81.2% (13/16) | −6.2 points |
-| Retrieval-oriented compression ("AKA") | 75.0% (12/16) | −12.5 points |
+| Raw chunk embedding | 100.0% (16/16) | — |
+| Generic LLM summary | 93.8% (15/16) | −6.2 points |
+| Retrieval-oriented compression ("AKA") | 68.8% (11/16) | −31.2 points |
 
 Compression made things worse here, and the more aggressive
-retrieval-oriented version was worse than a plain summary. Opposite
-direction from the historical claim.
+retrieval-oriented version was worse than a plain summary — by a lot.
+Reranking makes the raw baseline strong enough to get every query right on
+this small corpus, which leaves compression nothing to gain and only
+information to lose. Opposite direction from the historical claim, and
+the gap is larger than an earlier vector-search-only version of this test
+showed — reranking sharpens the effect rather than hiding it.
 
 My read: the 8 example documents are short (150-250 words), single-topic,
 and already dense — there's nothing redundant for compression to strip
@@ -58,6 +65,14 @@ out, so it just throws away words a query might match on. The original
 more redundant and verbose text per section. Compression trades off a cost
 (losing specific terms) against a benefit (removing noise), and which one
 wins probably depends on how noisy the source text already is.
+
+Worth noting: this repo's technique (AKA) *replaces* the raw chunk with a
+compressed representation before embedding. That's more aggressive than
+Anthropic's published Contextual Retrieval (2024) — covered in Huyen, *AI
+Engineering* — which *augments* the chunk with LLM-generated context
+instead of discarding the original text. Replacement can lose information
+that augmentation can't, which is a plausible reason AKA specifically hurt
+on a small, information-dense corpus where there was nothing to lose.
 
 ## 3. LLM compression: real production corpus
 
