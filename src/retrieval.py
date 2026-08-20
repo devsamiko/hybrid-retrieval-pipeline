@@ -20,7 +20,7 @@ import faiss  # noqa: F401 — imported early, before torch, to avoid a macOS
               # torch (via sentence-transformers) loads first.
 import numpy as np
 
-from embeddings import embed_text
+from .embeddings import embed_text
 
 
 class Index:

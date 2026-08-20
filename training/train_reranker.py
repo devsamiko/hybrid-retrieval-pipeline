@@ -34,12 +34,10 @@ import argparse
 import json
 import os
 import random
-import sys
 import time
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "src"))
 
 GOLDEN_FILE = ROOT / "data" / "golden_queries.json"
 DOCS_DIR = ROOT / "data" / "example_documents"
@@ -63,9 +61,9 @@ def _load_golden():
 def _build_search_index():
     """Build an in-memory hybrid-search index over the example documents."""
     import faiss  # noqa: F401 — import before torch, see src/retrieval.py
-    from chunking import semantic_chunk
-    from embeddings import embed_texts
-    from retrieval import Index
+    from src.chunking import semantic_chunk
+    from src.embeddings import embed_texts
+    from src.retrieval import Index
 
     index = Index(":memory:")
     docs = {f.name: f.read_text(encoding="utf-8") for f in sorted(DOCS_DIR.glob("*.md"))}
@@ -113,12 +111,14 @@ def generate_training_data():
     return training_pairs
 
 
-def train():
-    """Fine-tune the cross-encoder. See module docstring re: example-data scale."""
-    from sentence_transformers import CrossEncoder
-    from sentence_transformers.cross_encoder.evaluation import CEBinaryClassificationEvaluator
+def _score(result):
+    return result if isinstance(result, (int, float)) else max(result.values())
+
+
+def _prepare_train_eval_split():
+    """Load saved pairs, shuffle, and split into train/eval sets."""
     from sentence_transformers.readers import InputExample
-    from torch.utils.data import DataLoader
+    from sentence_transformers.cross_encoder.evaluation import CEBinaryClassificationEvaluator
 
     with open(TRAINING_DATA_FILE) as f:
         pairs = json.load(f)["pairs"]
@@ -139,11 +139,16 @@ def train():
         labels=[int(p["label"]) for p in eval_pairs],
         name="retrieval-pipeline-demo-eval",
     )
+    return train_samples, eval_pairs, evaluator
 
+
+def train():
+    """Fine-tune the cross-encoder. See module docstring re: example-data scale."""
+    from sentence_transformers import CrossEncoder
+    from torch.utils.data import DataLoader
+
+    train_samples, eval_pairs, evaluator = _prepare_train_eval_split()
     model = CrossEncoder(BASE_MODEL, num_labels=1, max_length=512)
-
-    def _score(result):
-        return result if isinstance(result, (int, float)) else max(result.values())
 
     pre_score = _score(evaluator(model))
     print(f"Pre-training eval score: {pre_score:.4f}")

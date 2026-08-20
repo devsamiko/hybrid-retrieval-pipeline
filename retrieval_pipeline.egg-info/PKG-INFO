@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: retrieval-pipeline
+Version: 0.1.0
+Summary: Standalone hybrid semantic search pipeline: chunking, LLM compression, vector+keyword retrieval with RRF, cross-encoder reranking
+Requires-Python: >=3.10
+Requires-Dist: sentence-transformers>=3.0
+Requires-Dist: torch>=2.0
+Requires-Dist: faiss-cpu>=1.8
+Requires-Dist: numpy>=1.26

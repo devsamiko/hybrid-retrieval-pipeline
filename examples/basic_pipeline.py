@@ -14,13 +14,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "src"))
 
 import faiss  # noqa: E402,F401 — import before torch, see src/retrieval.py
-from chunking import semantic_chunk       # noqa: E402
-from embeddings import embed_texts        # noqa: E402
-from retrieval import Index, hybrid_search  # noqa: E402
-from reranking import rerank              # noqa: E402
+from src.chunking import semantic_chunk           # noqa: E402
+from src.embeddings import embed_texts            # noqa: E402
+from src.retrieval import Index, hybrid_search     # noqa: E402
+from src.reranking import rerank                  # noqa: E402
 
 DOCS_DIR = ROOT / "data" / "example_documents"
 

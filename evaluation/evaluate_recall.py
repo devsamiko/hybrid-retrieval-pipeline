@@ -29,13 +29,12 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "src"))
 
 import faiss                                 # noqa: E402,F401 — see retrieval.py: must
                                               # import before torch to avoid a macOS segfault
-from chunking import semantic_chunk          # noqa: E402
-from embeddings import embed_texts           # noqa: E402
-from retrieval import Index                  # noqa: E402
+from src.chunking import semantic_chunk      # noqa: E402
+from src.embeddings import embed_texts       # noqa: E402
+from src.retrieval import Index              # noqa: E402
 
 DOCS_DIR = ROOT / "data" / "example_documents"
 GOLDEN_FILE = ROOT / "data" / "golden_queries.json"

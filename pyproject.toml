@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "retrieval-pipeline"
+version = "0.1.0"
+description = "Standalone hybrid semantic search pipeline: chunking, LLM compression, vector+keyword retrieval with RRF, cross-encoder reranking"
+requires-python = ">=3.10"
+dependencies = [
+    "sentence-transformers>=3.0",
+    "torch>=2.0",
+    "faiss-cpu>=1.8",
+    "numpy>=1.26",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
